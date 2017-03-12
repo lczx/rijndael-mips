@@ -3,8 +3,9 @@ An implementation of the [Rijndael AES](https://en.wikipedia.org/wiki/Advanced_E
 symmetric encryption algorithm (FIPS PUB 197).
 
 The code is written in MIPS assembly, can encrypt or decrypt data in both ECB and CBC
-[modes of operation](https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation)
-and accepts 128, 192 or 256 bit sized keys. It has a wrapper designed to work in the [MARS simulator](http://courses.missouristate.edu/KenVollmar/MARS/).
+[modes of operation](https://en.wikipedia.org/wiki/Block_cipher_modes_of_operation),
+handles optional OpenSSL-style padding and accepts 128, 192 or 256 bit sized keys.
+It has a wrapper designed to work in the [MARS simulator](http://courses.missouristate.edu/KenVollmar/MARS/).
 
 ## Structure
 
