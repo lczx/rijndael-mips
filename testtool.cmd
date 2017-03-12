@@ -2,7 +2,7 @@
 @echo off
 set s=%~n0
 call scala -cp "lib/jansi-1.11.jar;lib/Mars4_4.jar" %s%.cmd %*
-goto :eof
+exit /b
 ::!#
 
 import scala.language.implicitConversions
