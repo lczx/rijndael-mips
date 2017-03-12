@@ -1,0 +1,35 @@
+# Università di Pavia, Facoltà di Ingegneria, 2014
+# MIPS I '85 32-bit R300A compatible SPIM/MARS IO SYSCALL (AT&T SYNTAX)
+#
+# Luca Zanussi [410841] <luca.z@outlook.com>
+#
+# > Application memory mappings
+#
+
+# Default addresses:
+#   0x00400000 text
+#   0x10000000 extern
+#   0x10010000 data
+
+# ^^ NOTES ^^
+#   - Text without segmentation is from 400000 to 400c68, with a size of 3.1 KiB
+#   - Actual RAM space uses MARS kernel reserved addresses
+#   - Memory usage can be HUGELY improved by moving all ROM / RAM data under single '.data' directives,
+#     this is, however, not a problem if we are using virtual memory.
+
+# \\\ READ ONLY \\\    8 KiB EEPROM (0x00400000 : 0x00402000)
+    .eqv TEXT_KERNEL_ADDR  0x00400000 # 0x00400424    # main, eof, printusage, checkargs, parseargs, getdata, flushdata, [cutils]
+    .eqv TEXT_AESAPI_ADDR  0x00400500 # 0x00400754    # aes_encrypt, aes_encr_transform_source, aes_prepare
+    .eqv TEXT_AESKEYX_ADDR 0x00401000 # 0x00401240    # aes_keyexpand
+    .eqv TEXT_AESCORE_ADDR 0x00401500 # 0x004018b0    # aes_iencr
+
+# \\\ READ ONLY \\\    16 KiB CMOS (0x10010000 : 0x010014000)
+    .eqv DROM_KERNEL_ADDR  0x10010000 # 0x1001069f    # iobufsiz, [parser pointers & strings], [error strings], _hlp_
+    .eqv DROM_AESAPI_ADDR  0x10011000 # 0x1001122c    # [api error strings]
+    .eqv DROM_AELKUP_ADDR  0x10011500 # 0x10012528    # [lookup tables]
+
+# \\\ READ WRITE \\\   32 KiB DRAM (0x90000000 : 0x9008000)
+    .eqv DRAM_KERNEL_ADDR  0x90000000 # 0x90010244    # [i/o buffers, args, i/o vars]
+    .eqv DRAM_AESAPI_ADDR  0x90010500 # 0x90010518    # paddedsource_buffer, iv_ptr, cbc_started_chain
+    .eqv DRAM_AESKEYX_ADDR 0x90010600 # 0x900106f0    # key_schedule
+    .eqv DRAM_AESCORE_ADDR 0x90040700 # 0x90040710    # block_buffer
