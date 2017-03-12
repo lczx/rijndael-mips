@@ -58,7 +58,7 @@ def timeProfile(block: => Unit): Long = {
   (t1 - t0)
 }
 
-/** Runs a test collection on the given described file. Returns a touple of succeeded / total amount of tests. */ 
+/** Runs a test collection on the given described file. Returns a touple of succeeded / total amount of tests. */
 def runTestCollection(n: Int, desc: String, srcFile: String) = {
   aprintln(s"\n$BOLD$CYAN" + s"TEST #$n$WHITE - $desc$RESET")
   var collSuccessCount = 0
@@ -70,16 +70,16 @@ def runTestCollection(n: Int, desc: String, srcFile: String) = {
 
 /** Evaluates the given test, encrypts the provided file both with OpenSSL and Ares, then compares the results */
 def evalTest(inFile: String, keySize: AESKeySize.Value, opMode: AESBlockMethod.Value, padding: Boolean, debug: Boolean = false) = {
-  
+
   val partialArgFunction = genArgs(keySize, opMode, padding)
 
   // Here we write what we are testing on screen
   print(s"  AES-${getBits(keySize)} ${getMode(opMode).toUpperCase}, " + (if (padding) "w/" else "no") + " pad")
 
   // ---vv--- Command execution following ---vv---
-  val outFiles = List("ossl", "ares") map (s => "_out_" + s + "_" + inFile.split('/').last) // Output file names here!
+  val outFiles = List("ossl", "ares") map (s => "~out_" + s + "_" + inFile.split('/').last) // Output file names here!
 
-  val ret1 = runKernel(partialArgFunction("ossl.cmd", inFile, outFiles(0)), debug)
+  val ret1 = runKernel(partialArgFunction("openssl", inFile, outFiles(0)), debug)
   val ret2 = runKernel(partialArgFunction("ares.cmd", inFile, outFiles(1)), debug)
 
   // OpenSSL decided to output an empty file even in case of error...
@@ -106,7 +106,7 @@ def evalTest(inFile: String, keySize: AESKeySize.Value, opMode: AESBlockMethod.V
   }
 
   if (!result && hltMode) System.exit(1)
-   
+
   if (debug) println() // Pure --debug-- aesthetics
   outFiles foreach (new File(_).delete()) // Delete outputs
 
@@ -122,10 +122,10 @@ def runKernel(args: List[String], debug: Boolean = false) = {
   if (!prcMode && args.head == "ares.cmd") { // ARES arguments can be directly passed to the MARS simulator
     // Forbid exit calls from now on, otherwise MARS will close our script while exiting.
     SecurityUtil.forbidExitCalls()
-    
+
     // MARS arguments, see "ares.cmd" if you wanna know more
     def simArgs = Array("sm", "nc", "p", _: String, "pa")
- 
+
     val exitValue = try { disableSystemOut(debug) {
       Mars.main(simArgs("asm/main.asm") ++ args.tail)
     } }
@@ -192,9 +192,16 @@ def getMode = (_: AESBlockMethod.Value) match {
 
 
 def showTitle() {
+  var sslVerProc = new ProcessBuilder("openssl", "version").start
+  val sslVerOut = new BufferedReader(new InputStreamReader(sslVerProc.getInputStream))
+  val sslVerData = sslVerOut.readLine() split " "
+  sslVerOut.close();
+  sslVerProc.waitFor()
+  val sslVer = s"OpenSSL / SSLeay ${sslVerData(1)} (${sslVerData drop 3 mkString " "})"
+
   val title = BOLD + "ARES functionality test tool, proudly powered by " +
     (((1 to 6) ++ (1 to 6) zip "IMMAGINATION") map (x => "\u001B[3" + x._1 + "m" + x._2)).mkString + RESET
-  val notice = "OpenSSL / SSLeay 1.0.1g (7 Apr 2014)       MARS 4.4 runtime (Aug 2013)"
+  val notice = f"$sslVer%-42s MARS 4.4 runtime (Aug 2013)"
 
   println("   " + '\u00da' + '\u00c4'.toString * 70 + '\u00bf')
   aprintln(s"   \u00b3    $title     \u00b3")
